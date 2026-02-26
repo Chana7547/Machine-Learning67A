@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Full Prediction App
+Full Prediction App (No Encoder Version)
 """
 
 import pickle
@@ -13,7 +13,6 @@ from streamlit_option_menu import option_menu
 used_car_model = pickle.load(open("used_cars_model.sav", "rb"))
 riding_model = pickle.load(open("RidingMowers_model.sav", "rb"))
 bmi_model = pickle.load(open("bmi_model.sav", "rb"))
-gender_encoder = pickle.load(open("gender_encoder.sav", "rb"))
 
 # -----------------------------
 # Mapping Dictionaries
@@ -109,7 +108,8 @@ elif selected == "BMI":
 
     if st.button("Predict"):
         try:
-            gender_encoded = gender_encoder.transform([gender])[0]
+            # 🔥 ไม่ใช้ encoder แล้ว
+            gender_encoded = 1 if gender == "Male" else 0
 
             X = [[
                 gender_encoded,

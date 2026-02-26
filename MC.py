@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb 19 15:58:19 2026
-@author: khxwwcx
+Full Prediction App
 """
 
 import pickle
-from streamlit_option_menu import option_menu
 import streamlit as st
+from streamlit_option_menu import option_menu
 
+# -----------------------------
+# Load Models
+# -----------------------------
 used_car_model = pickle.load(open("used_cars_model.sav", "rb"))
 riding_model = pickle.load(open("RidingMowers_model.sav", "rb"))
+bmi_model = pickle.load(open("bmi_model.sav", "rb"))
+gender_encoder = pickle.load(open("gender_encoder.sav", "rb"))
 
+# -----------------------------
+# Mapping Dictionaries
+# -----------------------------
 fuel_map = {"Diesel": 0, "Electric": 1, "Petrol": 2}
 
 engine_map = {
@@ -26,35 +33,45 @@ brand_map = {
 
 transmission_map = {"Automatic": 0, "Manual": 1}
 
+# -----------------------------
+# Sidebar
+# -----------------------------
 with st.sidebar:
     selected = option_menu(
         menu_title="Prediction",
-        options=["Riding Mower", "Used Cars"],
-        icons=["activity", "car-front"],
+        options=["Riding Mower", "Used Cars", "BMI"],
+        icons=["activity", "car-front", "heart"],
         default_index=0
     )
 
+# =====================================================
+# RIDING MOWER
+# =====================================================
 if selected == "Riding Mower":
+
     st.title("Riding Mower Prediction")
 
-    Income = st.text_input("income")
-    LotSize = st.text_input("Lotsize")
+    Income = st.text_input("Income")
+    LotSize = st.text_input("Lot Size")
 
     if st.button("Predict Riding"):
         try:
-            Ridding_prediction = riding_model.predict([[float(Income), float(LotSize)]])[0]
-            st.success(Ridding_prediction)
+            prediction = riding_model.predict([[float(Income), float(LotSize)]])[0]
+            st.success(str(prediction))
         except:
             st.error("กรอกตัวเลขให้ครบ")
 
+# =====================================================
+# USED CAR
+# =====================================================
 elif selected == "Used Cars":
 
-    st.title("ประเมินราคารถมือ 2")
+    st.title("Used Car Price Prediction")
 
     make_year = st.text_input("ปีที่ผลิต")
     mileage_kmpl = st.text_input("กินน้ำมัน (KM/L)")
     owner_count = st.text_input("จำนวนเจ้าของเดิม")
-    accidents_reported = st.text_input("จำนวนอุบัติเหตุที่เคยเกิด")
+    accidents_reported = st.text_input("จำนวนอุบัติเหตุ")
 
     brand = st.selectbox("ยี่ห้อรถ", list(brand_map.keys()))
     engine_cc = st.selectbox("ขนาดเครื่องยนต์ (CC)", list(engine_map.keys()))
@@ -75,8 +92,43 @@ elif selected == "Used Cars":
             ]]
 
             price_predict = used_car_model.predict(X)[0]
-            st.success(round(float(price_predict), 2))
+            st.success(str(round(float(price_predict), 2)))
+        except:
+            st.error("กรอกข้อมูลให้ครบ")
+
+# =====================================================
+# BMI
+# =====================================================
+elif selected == "BMI":
+
+    st.title("BMI Classification")
+
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    height = st.text_input("Height (cm)")
+    weight = st.text_input("Weight (kg)")
+
+    if st.button("Predict"):
+        try:
+            gender_encoded = gender_encoder.transform([gender])[0]
+
+            X = [[
+                gender_encoded,
+                float(height),
+                float(weight)
+            ]]
+
+            prediction = bmi_model.predict(X)[0]
+
+            bmi_labels = {
+                0: "Extremely Weak (ผอมมาก)",
+                1: "Weak (ผอม)",
+                2: "Normal (ปกติ)",
+                3: "Overweight (ท้วม)",
+                4: "Obesity (อ้วน)",
+                5: "Extreme Obesity (อ้วนมาก)"
+            }
+
+            st.success(bmi_labels[prediction])
 
         except:
-
             st.error("กรอกข้อมูลให้ครบ")

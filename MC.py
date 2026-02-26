@@ -8,8 +8,8 @@ import pickle
 from streamlit_option_menu import option_menu
 import streamlit as st
 
-used_car_model = pickle.load(open(r"C:\Users\khxwwcx\Desktop\ML\used_cars_model.sav", "rb"))
-riding_model = pickle.load(open(r"C:\Users\khxwwcx\Desktop\ML\RidingMowers_model.sav", "rb"))
+used_car_model = pickle.load(open("used_cars_model.sav", "rb"))
+riding_model = pickle.load(open("RidingMowers_model.sav", "rb"))
 
 fuel_map = {"Diesel": 0, "Electric": 1, "Petrol": 2}
 
@@ -78,4 +78,5 @@ elif selected == "Used Cars":
             st.success(round(float(price_predict), 2))
 
         except:
+
             st.error("กรอกข้อมูลให้ครบ")
